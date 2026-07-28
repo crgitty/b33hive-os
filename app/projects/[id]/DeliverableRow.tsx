@@ -1,6 +1,7 @@
 import {
   approveQC,
   incrementRevision,
+  renameDeliverable,
   setClientVisible,
 } from "@/lib/projects/actions";
 import { formatDate } from "@/lib/dates";
@@ -18,10 +19,20 @@ export function DeliverableRow({
 
   return (
     <div className="rounded-md border border-border p-3 text-sm">
-      <div className="flex items-center justify-between">
-        <span>{deliverable.name}</span>
+      <div className="flex items-center justify-between gap-2">
+        <form
+          action={renameDeliverable.bind(null, deliverable.id, projectId)}
+          className="flex flex-1 gap-1.5"
+        >
+          <input
+            name="name"
+            defaultValue={deliverable.name}
+            className="flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 hover:border-border focus:border-border focus:bg-background"
+          />
+          <button className="text-xs text-muted hover:text-gold">Save</button>
+        </form>
         {deliverable.revision_count > 0 && (
-          <span className="text-xs text-muted">
+          <span className="shrink-0 text-xs text-muted">
             {deliverable.revision_count} rev.
           </span>
         )}

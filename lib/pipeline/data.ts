@@ -67,6 +67,53 @@ export async function getOfferOptions(): Promise<OfferOption[]> {
   return data ?? [];
 }
 
+export interface DealForEdit {
+  id: string;
+  contact_id: string;
+  offer_type: string;
+  value_cents: number;
+  contact_name: string;
+  contact_org: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  contact_source: string | null;
+}
+
+function unwrapOne<T>(value: T | T[] | null): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value;
+}
+
+export async function getDealForEdit(dealId: string): Promise<DealForEdit | null> {
+  const supabase = getSupabaseServerClient();
+  const { data } = await supabase
+    .from("deals")
+    .select("id, contact_id, offer_type, value_cents, contacts(name, org, email, phone, source)")
+    .eq("id", dealId)
+    .maybeSingle();
+  if (!data) return null;
+
+  const contact = unwrapOne(data.contacts as unknown) as {
+    name: string;
+    org: string | null;
+    email: string | null;
+    phone: string | null;
+    source: string | null;
+  } | null;
+
+  return {
+    id: data.id,
+    contact_id: data.contact_id,
+    offer_type: data.offer_type,
+    value_cents: data.value_cents,
+    contact_name: contact?.name ?? "",
+    contact_org: contact?.org ?? null,
+    contact_email: contact?.email ?? null,
+    contact_phone: contact?.phone ?? null,
+    contact_source: contact?.source ?? null,
+  };
+}
+
 export interface Activity {
   id: string;
   deal_id: string | null;

@@ -5,6 +5,7 @@ import {
   approvePhaseGate,
   createDeliverable,
   createPhase,
+  renamePhase,
   updatePhaseGateUrl,
   updateProjectStatus,
 } from "@/lib/projects/actions";
@@ -70,9 +71,19 @@ export default async function ProjectDetailPage({
             key={phase.id}
             className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3"
           >
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm font-medium">{phase.name}</span>
-              <span className="text-xs text-muted">Phase {phase.sequence}</span>
+            <div className="flex items-center justify-between gap-2">
+              <form
+                action={renamePhase.bind(null, phase.id, project.id)}
+                className="flex flex-1 gap-1.5"
+              >
+                <input
+                  name="name"
+                  defaultValue={phase.name}
+                  className="flex-1 rounded border border-transparent bg-transparent px-1 py-0.5 text-sm font-medium hover:border-border focus:border-border focus:bg-background"
+                />
+                <button className="text-xs text-muted hover:text-gold">Save</button>
+              </form>
+              <span className="shrink-0 text-xs text-muted">Phase {phase.sequence}</span>
             </div>
 
             {phase.approved_at ? (

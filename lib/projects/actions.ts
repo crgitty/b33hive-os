@@ -28,6 +28,21 @@ export async function createPhase(formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
 }
 
+export async function renamePhase(
+  phaseId: string,
+  projectId: string,
+  formData: FormData,
+) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) throw new Error("Phase name cannot be empty.");
+
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase.from("phases").update({ name }).eq("id", phaseId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/projects/${projectId}`);
+}
+
 export async function updatePhaseGateUrl(formData: FormData) {
   const supabase = getSupabaseServerClient();
   const phaseId = String(formData.get("phase_id") ?? "");
@@ -66,6 +81,24 @@ export async function createDeliverable(formData: FormData) {
     phase_id: phaseId,
     name,
   });
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function renameDeliverable(
+  deliverableId: string,
+  projectId: string,
+  formData: FormData,
+) {
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) throw new Error("Deliverable name cannot be empty.");
+
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase
+    .from("deliverables")
+    .update({ name })
+    .eq("id", deliverableId);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/projects/${projectId}`);
@@ -129,5 +162,20 @@ export async function updateProjectStatus(formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/projects");
+}
+
+export async function deleteProjects(projectIds: string[]) {
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase.from("projects").delete().in("id", projectIds);
+  if (error) {
+    if (error.code === "23503") {
+      throw new Error(
+        "One or more projects have invoices or case studies referencing them and cannot be deleted.",
+      );
+    }
+    throw new Error(error.message);
+  }
+
   revalidatePath("/projects");
 }
