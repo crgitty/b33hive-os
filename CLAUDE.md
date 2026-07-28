@@ -21,6 +21,18 @@ That continuity is the entire point — do not build these as isolated features.
 No auth for now. Single user, local machine. Do not add login screens, role checks,
 or multi-tenancy until explicitly asked.
 
+### RLS is not enabled — blocker for deploy
+
+Row Level Security is **off on every table**. The publishable key ships to the browser,
+so today anyone holding it can read and write the whole database. That is fine only
+because this runs locally for one operator.
+
+**RLS must be enabled, with policies, before the first Vercel deploy.** Not after,
+not "once there's real data in it" — the moment the app is reachable at a public URL.
+Enabling RLS without policies denies all access and breaks the app, so auth and policies
+land together, in that order: auth first, then policies, then deploy. A starting-point
+migration is sketched at the bottom of `supabase/migrations/0001_init.sql`.
+
 ---
 
 ## Non-negotiable rules
