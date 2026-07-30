@@ -14,7 +14,7 @@ export default async function Home() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-6 py-5">
       <header>
-        <h1 className="text-base font-medium">Overview</h1>
+        <h1 className="text-2xl font-medium">Overview</h1>
       </header>
 
       <section className="grid grid-cols-4 gap-4">

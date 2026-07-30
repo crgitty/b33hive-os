@@ -26,7 +26,6 @@ export default async function TimePage() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10">
       <header className="flex items-start justify-between">
         <div>
-          <div className="text-sm text-muted">B33HIVE OS</div>
           <h1 className="text-2xl font-medium">Time</h1>
           <div className="text-sm text-muted">
             Read-only mirror of Toggl — never edited here

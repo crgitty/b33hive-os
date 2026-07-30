@@ -10,7 +10,6 @@ export default function TimeError({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-6 py-10">
       <div>
-        <div className="text-sm text-muted">B33HIVE OS</div>
         <h1 className="text-2xl font-medium">Time</h1>
       </div>
       <div className="rounded-lg border border-bad p-4 text-sm">
