@@ -58,6 +58,14 @@ A rule that lives only in a form validation is a rule that gets skipped under de
    seeded fake records, no placeholder revenue figures rendered as if actual. Empty
    state is the correct state until real data exists.
 
+6. **At most 2 active pilots at a time.** A pilot is active while its status is
+   `planned` or `running`. Enforced by a trigger (cross-row counts can't be expressed
+   as a CHECK constraint) — not a disabled "add pilot" button.
+
+7. **A pilot needs 3+ paying customers before a decision can be recorded.** Applies to
+   every decision outcome, including abandoning it. Enforced with a CHECK constraint
+   on `pilots` (`decision is null or customer_count >= 3`).
+
 ---
 
 ## The three offers
@@ -106,8 +114,12 @@ problems        id, org_type, description, frequency_score, pain_score,
                 -> combined_score = frequency_score * pain_score (computed)
                 -> flag when combined_score >= 12
 
-pilots          id, problem_id, customer_count, status, launched_at, decision_due_at
+pilots          id, problem_id, customer_count, status, launched_at, decision_due_at,
+                decision, decided_at
                 -> decision_due_at = launched_at + 90 days
+                -> status: planned / running / decided
+                -> decision (fixed enum, only set once status = decided):
+                   remain_service / become_product / form_venture / abandon
 
 case_studies    id, project_id, problem, baseline, work_performed, outcome,
                 quote, permission_status, industry_tag, published_at
