@@ -6,6 +6,7 @@ import {
   getMRRCents,
   getTrailing90ExpensesCents,
 } from "@/lib/finance/shared";
+import type { ProjectStatus } from "@/lib/projects/data";
 
 export type DealStage =
   | "contacted"
@@ -53,7 +54,9 @@ export interface OverviewData {
   pipelineValueCents: number;
   mrrCents: number;
   stageCounts: Record<DealStage, number>;
+  staleDealsCount: number;
   activeProjects: number;
+  projectStatusCounts: Record<ProjectStatus, number>;
   hoursThisWeek: number;
   receivables30PlusCents: number;
   problemsTotal: number;
@@ -69,6 +72,7 @@ export async function getOverviewData(): Promise<OverviewData> {
     expenses90Total,
     mrrCents,
     { data: deals },
+    { count: staleDealsCount },
     { data: offers },
     { data: projects },
     { data: paidInvoices },
@@ -83,6 +87,10 @@ export async function getOverviewData(): Promise<OverviewData> {
     getTrailing90ExpensesCents(supabase),
     getMRRCents(supabase),
     supabase.from("deals").select("id, value_cents, stage"),
+    supabase
+      .from("deals_pipeline")
+      .select("*", { count: "exact", head: true })
+      .not("stale_reason", "is", null),
     supabase.from("offers").select("slug, is_recurring"),
     supabase
       .from("projects")
@@ -139,6 +147,16 @@ export async function getOverviewData(): Promise<OverviewData> {
     (offers ?? []).map((o) => [o.slug, o.is_recurring as boolean]),
   );
   const activeProjects = (projects ?? []).filter((p) => p.status === "active").length;
+  const projectStatusCounts: Record<ProjectStatus, number> = {
+    active: 0,
+    on_hold: 0,
+    complete: 0,
+    cancelled: 0,
+  };
+  for (const p of projects ?? []) {
+    const status = p.status as ProjectStatus;
+    projectStatusCounts[status] = (projectStatusCounts[status] ?? 0) + 1;
+  }
 
   // --- Cash + runway -----------------------------------------------------
   const cashOnHandCents: Metric = cashSnapshot
@@ -179,7 +197,9 @@ export async function getOverviewData(): Promise<OverviewData> {
     pipelineValueCents,
     mrrCents,
     stageCounts,
+    staleDealsCount: staleDealsCount ?? 0,
     activeProjects,
+    projectStatusCounts,
     hoursThisWeek,
     receivables30PlusCents,
     problemsTotal: problemsTotal ?? 0,

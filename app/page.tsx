@@ -2,8 +2,9 @@ import { getOverviewData } from "@/lib/overview/data";
 import { formatCents } from "@/lib/money";
 import { formatDate } from "@/lib/dates";
 import { StatTile, knownMetric } from "@/app/_components/StatTile";
-import { StageRow } from "@/app/_components/StageRow";
-import { Gate1Panel } from "@/app/_components/Gate1Panel";
+import { PipelineSnapshot } from "@/app/_components/PipelineSnapshot";
+import { ActiveProjectsPanel } from "@/app/_components/ActiveProjectsPanel";
+import { Gate1Strip } from "@/app/_components/Gate1Strip";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,12 @@ export default async function Home() {
   const data = await getOverviewData();
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-2.5 px-5 py-4">
       <header>
-        <div className="text-sm text-muted">B33HIVE OS</div>
-        <h1 className="text-2xl font-medium">Overview</h1>
+        <h1 className="text-base font-medium">Overview</h1>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-4 gap-2.5">
         <StatTile
           label="Cash on hand"
           metric={data.cashOnHandCents}
@@ -28,51 +28,50 @@ export default async function Home() {
           label="Weeks runway"
           metric={data.weeksRunway}
           format={(v) => Math.round(v).toString()}
-          sublabel="At trailing 90-day burn"
+          sublabel="Trailing 90-day burn"
         />
         <StatTile
           label="Pipeline value"
           metric={knownMetric(data.pipelineValueCents)}
           format={formatCents}
-          sublabel="Open deals, excludes Won/Lost"
+          sublabel="Open deals"
         />
         <StatTile
           label="MRR"
           metric={knownMetric(data.mrrCents)}
           format={formatCents}
-          sublabel="Active recurring projects"
+          sublabel="Active recurring"
         />
       </section>
 
-      <StageRow counts={data.stageCounts} />
-
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile
-          label="Active projects"
-          metric={knownMetric(data.activeProjects)}
-          format={(v) => v.toString()}
+      <section className="grid grid-cols-[1.15fr_1fr] gap-2.5">
+        <PipelineSnapshot counts={data.stageCounts} staleCount={data.staleDealsCount} />
+        <ActiveProjectsPanel
+          activeCount={data.activeProjects}
+          statusCounts={data.projectStatusCounts}
         />
+      </section>
+
+      <section className="grid grid-cols-3 gap-2.5">
         <StatTile
           label="Hours this week"
           metric={knownMetric(data.hoursThisWeek)}
           format={(v) => v.toFixed(1)}
-          sublabel="Toggl mirror, not yet connected"
         />
         <StatTile
           label="Receivables 30+"
           metric={knownMetric(data.receivables30PlusCents)}
           format={formatCents}
-          sublabel="Unpaid, issued 30+ days ago"
         />
         <StatTile
           label="Problems logged"
           metric={knownMetric(data.problemsTotal)}
           format={(v) => v.toString()}
-          sublabel={`${data.problemsFlagged} flagged (score ≥ 12)`}
+          sublabel={`${data.problemsFlagged} flagged`}
         />
       </section>
 
-      <Gate1Panel conditions={data.gate1} />
+      <Gate1Strip conditions={data.gate1} />
     </main>
   );
 }
