@@ -12,12 +12,12 @@ export default async function Home() {
   const data = await getOverviewData();
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-2.5 px-5 py-4">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-6 py-5">
       <header>
         <h1 className="text-base font-medium">Overview</h1>
       </header>
 
-      <section className="grid grid-cols-4 gap-2.5">
+      <section className="grid grid-cols-4 gap-4">
         <StatTile
           label="Cash on hand"
           metric={data.cashOnHandCents}
@@ -44,7 +44,7 @@ export default async function Home() {
         />
       </section>
 
-      <section className="grid grid-cols-[1.15fr_1fr] gap-2.5">
+      <section className="grid grid-cols-[1.15fr_1fr] gap-4">
         <PipelineSnapshot counts={data.stageCounts} staleCount={data.staleDealsCount} />
         <ActiveProjectsPanel
           activeCount={data.activeProjects}
@@ -52,14 +52,14 @@ export default async function Home() {
         />
       </section>
 
-      <section className="grid grid-cols-3 gap-2.5">
+      <section className="grid grid-cols-3 gap-4">
         <StatTile
           label="Hours this week"
           metric={knownMetric(data.hoursThisWeek)}
           format={(v) => v.toFixed(1)}
         />
         <StatTile
-          label="Receivables 30+"
+          label="Receivables"
           metric={knownMetric(data.receivables30PlusCents)}
           format={formatCents}
         />

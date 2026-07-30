@@ -12,13 +12,13 @@ export function StatTile({
   sublabel?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-2.5">
+    <div className="rounded-lg border border-border bg-surface p-3.5">
       <div className="text-xs text-muted">{label}</div>
-      <div className="mt-0.5 text-[19px] font-medium tabular-nums text-foreground">
+      <div className="mt-1 text-[24px] font-medium tabular-nums text-foreground">
         {metric.known ? format(metric.value) : "—"}
       </div>
       {(metric.known ? sublabel : metric.reason) && (
-        <div className="mt-0.5 truncate text-[10px] text-muted">
+        <div className="mt-1 text-xs leading-snug text-muted">
           {metric.known ? sublabel : metric.reason}
         </div>
       )}
