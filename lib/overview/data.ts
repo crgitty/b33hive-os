@@ -1,5 +1,11 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { daysAgoIso, monthKey, startOfWeekIso } from "@/lib/dates";
+import {
+  computeWeeksRunway,
+  getLatestCashSnapshot,
+  getMRRCents,
+  getTrailing90ExpensesCents,
+} from "@/lib/finance/shared";
 
 export type DealStage =
   | "contacted"
@@ -55,19 +61,13 @@ export interface OverviewData {
   gate1: GateCondition[];
 }
 
-// A to-one embed (deal_id is unique) comes back as an object from Supabase, but as an
-// array if the relationship can't be resolved as one-to-one — handle both defensively.
-function unwrapOne<T>(value: T | T[] | null): T | null {
-  if (Array.isArray(value)) return value[0] ?? null;
-  return value;
-}
-
 export async function getOverviewData(): Promise<OverviewData> {
   const supabase = getSupabaseServerClient();
 
   const [
-    { data: cashSnapshot },
-    { data: expenses90 },
+    cashSnapshot,
+    expenses90Total,
+    mrrCents,
     { data: deals },
     { data: offers },
     { data: projects },
@@ -79,21 +79,14 @@ export async function getOverviewData(): Promise<OverviewData> {
     { data: earliestDeal },
     { data: earliestProject },
   ] = await Promise.all([
-    supabase
-      .from("cash_snapshots")
-      .select("balance_cents, as_of")
-      .order("as_of", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("expenses")
-      .select("amount_cents, incurred_at")
-      .gte("incurred_at", daysAgoIso(90)),
+    getLatestCashSnapshot(supabase),
+    getTrailing90ExpensesCents(supabase),
+    getMRRCents(supabase),
     supabase.from("deals").select("id, value_cents, stage"),
     supabase.from("offers").select("slug, is_recurring"),
     supabase
       .from("projects")
-      .select("id, status, offer_type, contact_id, started_at, deals(value_cents)"),
+      .select("id, status, offer_type, contact_id, started_at"),
     supabase
       .from("invoices")
       .select("amount_cents, paid_at, project_id")
@@ -141,37 +134,18 @@ export async function getOverviewData(): Promise<OverviewData> {
     }
   }
 
-  // --- MRR -------------------------------------------------------------------
+  // --- Recurring-offer map (Gate 1 condition 5) + active project count -----
   const recurringByOffer = new Map(
     (offers ?? []).map((o) => [o.slug, o.is_recurring as boolean]),
   );
-  let mrrCents = 0;
-  let activeProjects = 0;
-  for (const p of projects ?? []) {
-    if (p.status === "active") {
-      activeProjects += 1;
-      if (recurringByOffer.get(p.offer_type)) {
-        const deal = unwrapOne(p.deals as unknown);
-        if (deal) mrrCents += (deal as { value_cents: number }).value_cents;
-      }
-    }
-  }
+  const activeProjects = (projects ?? []).filter((p) => p.status === "active").length;
 
   // --- Cash + runway -----------------------------------------------------
   const cashOnHandCents: Metric = cashSnapshot
-    ? { known: true, value: cashSnapshot.balance_cents }
+    ? { known: true, value: cashSnapshot.balanceCents }
     : { known: false, reason: "No cash snapshot logged yet" };
 
-  const expenses90Total = (expenses90 ?? []).reduce(
-    (sum, e) => sum + e.amount_cents,
-    0,
-  );
-  const weeklyBurnCents = expenses90Total / (90 / 7);
-
-  const weeksRunway: Metric =
-    !cashSnapshot || weeklyBurnCents === 0
-      ? { known: false, reason: "Not enough expense history yet" }
-      : { known: true, value: cashSnapshot.balance_cents / weeklyBurnCents };
+  const weeksRunway = computeWeeksRunway(cashSnapshot?.balanceCents ?? null, expenses90Total);
 
   // --- Hours this week / receivables / problems --------------------------
   const hoursThisWeek = (timeEntriesThisWeek ?? []).reduce(
@@ -195,12 +169,12 @@ export async function getOverviewData(): Promise<OverviewData> {
     projects: projects ?? [],
     recurringByOffer,
     expenses90Total,
-    cashOnHandCents: cashSnapshot?.balance_cents ?? null,
+    cashOnHandCents: cashSnapshot?.balanceCents ?? null,
   });
 
   return {
     cashOnHandCents,
-    cashAsOf: cashSnapshot?.as_of ?? null,
+    cashAsOf: cashSnapshot?.asOf ?? null,
     weeksRunway,
     pipelineValueCents,
     mrrCents,
@@ -221,7 +195,6 @@ interface Gate1Input {
     id: string;
     contact_id: string;
     offer_type: string;
-    deals: unknown;
   }[];
   recurringByOffer: Map<string, boolean>;
   expenses90Total: number;

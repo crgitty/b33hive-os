@@ -28,6 +28,19 @@ export function monthKey(iso: string): string {
   return iso.slice(0, 7); // "YYYY-MM"
 }
 
+/** For values that represent a calendar day, not a moment in time (e.g. a due date
+ * entered via <input type="date">). Those land in the DB as UTC midnight; formatDate's
+ * local-time conversion can then shift them a day in any timezone behind UTC. This reads
+ * the date parts directly off the string instead of round-tripping through a Date. */
+export function formatDateOnly(iso: string): string {
+  const [year, month, day] = iso.slice(0, 10).split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
+}
+
 export function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",

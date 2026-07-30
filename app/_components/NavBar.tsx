@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/pipeline", label: "Pipeline" },
   { href: "/projects", label: "Projects" },
   { href: "/time", label: "Time" },
+  { href: "/finance", label: "Finance" },
 ];
 
 export function NavBar() {
