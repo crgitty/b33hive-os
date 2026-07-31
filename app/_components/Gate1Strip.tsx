@@ -1,10 +1,14 @@
+import Link from "next/link";
 import type { GateCondition } from "@/lib/overview/data";
 
 export function Gate1Strip({ conditions }: { conditions: GateCondition[] }) {
   const clearedCount = conditions.filter((c) => c.status === "pass").length;
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-3.5">
+    <Link
+      href="/finance"
+      className="block cursor-pointer rounded-lg border border-border bg-surface p-3.5 hover:border-border-strong"
+    >
       <div className="flex items-baseline justify-between">
         <span className="text-xs text-muted">Gate 1 tracker</span>
         <span className="text-xs text-muted">
@@ -27,6 +31,6 @@ export function Gate1Strip({ conditions }: { conditions: GateCondition[] }) {
       <div className="mt-2 text-xs leading-snug text-muted">
         {conditions.map((c) => c.label).join(" · ")}
       </div>
-    </div>
+    </Link>
   );
 }

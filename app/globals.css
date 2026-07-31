@@ -5,6 +5,7 @@
   --background: #0a0a0a;
   --surface: #141310;
   --border: #2a2822;
+  --border-strong: #46433a;
   --foreground: #f2efe8;
   --muted: #c7c4bd;
   --gold: #d4af37;
@@ -16,6 +17,7 @@
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-gold: var(--gold);

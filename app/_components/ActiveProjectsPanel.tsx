@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PROJECT_STATUS_LABELS, type ProjectStatus } from "@/lib/projects/data";
 
 const ROWS: ProjectStatus[] = ["active", "on_hold", "complete", "cancelled"];
@@ -10,7 +11,10 @@ export function ActiveProjectsPanel({
   statusCounts: Record<ProjectStatus, number>;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-3.5">
+    <Link
+      href="/projects"
+      className="block cursor-pointer rounded-lg border border-border bg-surface p-3.5 hover:border-border-strong"
+    >
       <div className="flex items-baseline justify-between">
         <span className="text-xs text-muted">Active projects</span>
         <span className="text-[24px] font-medium tabular-nums text-foreground">
@@ -28,6 +32,6 @@ export function ActiveProjectsPanel({
           </div>
         ))}
       </div>
-    </div>
+    </Link>
   );
 }

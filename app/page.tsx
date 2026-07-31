@@ -19,24 +19,28 @@ export default async function Home() {
 
       <section className="grid grid-cols-4 gap-4">
         <StatTile
+          href="/finance"
           label="Cash on hand"
           metric={data.cashOnHandCents}
           format={formatCents}
           sublabel={data.cashAsOf ? `As of ${formatDate(data.cashAsOf)}` : undefined}
         />
         <StatTile
+          href="/finance"
           label="Weeks runway"
           metric={data.weeksRunway}
           format={(v) => Math.round(v).toString()}
           sublabel="Trailing 90-day burn"
         />
         <StatTile
+          href="/pipeline"
           label="Pipeline value"
           metric={knownMetric(data.pipelineValueCents)}
           format={formatCents}
           sublabel="Open deals"
         />
         <StatTile
+          href="/finance"
           label="MRR"
           metric={knownMetric(data.mrrCents)}
           format={formatCents}
@@ -54,16 +58,19 @@ export default async function Home() {
 
       <section className="grid grid-cols-3 gap-4">
         <StatTile
+          href="/time"
           label="Hours this week"
           metric={knownMetric(data.hoursThisWeek)}
           format={(v) => v.toFixed(1)}
         />
         <StatTile
+          href="/finance"
           label="Receivables"
           metric={knownMetric(data.receivables30PlusCents)}
           format={formatCents}
         />
         <StatTile
+          href="/intelligence"
           label="Problems logged"
           metric={knownMetric(data.problemsTotal)}
           format={(v) => v.toString()}

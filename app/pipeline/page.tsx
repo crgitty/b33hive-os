@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { getPipelineBoard } from "@/lib/pipeline/data";
 import { PipelineBoard } from "@/app/pipeline/PipelineBoard";
+import { STAGE_ORDER, type DealStage } from "@/lib/overview/data";
 
 export const dynamic = "force-dynamic";
 
-export default async function PipelinePage() {
+export default async function PipelinePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stage?: string }>;
+}) {
+  const { stage } = await searchParams;
   const board = await getPipelineBoard();
+  const highlightStage = STAGE_ORDER.includes(stage as DealStage)
+    ? (stage as DealStage)
+    : null;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-10">
@@ -19,7 +28,7 @@ export default async function PipelinePage() {
         </Link>
       </header>
 
-      <PipelineBoard board={board} />
+      <PipelineBoard board={board} highlightStage={highlightStage} />
     </main>
   );
 }

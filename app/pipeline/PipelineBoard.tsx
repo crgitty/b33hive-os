@@ -75,8 +75,10 @@ function DealCard({
 
 export function PipelineBoard({
   board,
+  highlightStage,
 }: {
   board: Record<DealStage, PipelineDeal[]>;
+  highlightStage?: DealStage | null;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -156,7 +158,7 @@ export function PipelineBoard({
             onDragLeave={() => setDragOverStage((s) => (s === stage ? null : s))}
             onDrop={(e) => handleDrop(e, stage)}
             className={`flex flex-col gap-3 rounded-lg border p-3 ${
-              dragOverStage === stage
+              dragOverStage === stage || highlightStage === stage
                 ? "border-gold bg-surface"
                 : "border-border bg-surface"
             }`}
